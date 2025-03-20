@@ -4,86 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta CNPJ - Receita WS</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-        }
-        .container {
-            max-width: 400px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-        }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #resultado {
-            margin-top: 20px;
-            text-align: left;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <h1>Consulta CNPJ - Receita WS</h1>
-        <input type="text" id="cnpj" placeholder="Digite o CNPJ (somente números)">
-        <button onclick="buscarCNPJ()">Buscar</button>
-        <div id="resultado"></div>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center text-gray-700">Consulta CNPJ</h1>
+        <input type="text" id="cnpj" placeholder="Digite o CNPJ (somente números)" 
+               class="w-full p-3 mt-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+               aria-label="Digite o CNPJ">
+        <button onclick="buscarCNPJ()" 
+                class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-3">Buscar</button>
+        
+        <div id="loading" class="text-center text-gray-600 mt-3 hidden">Carregando...</div>
+        <div id="resultado" class="mt-4 text-gray-700"></div>
     </div>
 
     <script>
         function buscarCNPJ() {
             const cnpj = document.getElementById('cnpj').value.trim().replace(/\D/g, '');
             const resultadoDiv = document.getElementById('resultado');
+            const loadingDiv = document.getElementById('loading');
+            
+            resultadoDiv.innerHTML = '';
             
             if (!/^[0-9]{14}$/.test(cnpj)) {
-                resultadoDiv.innerHTML = '<p style="color: red;">Digite um CNPJ válido com 14 números.</p>';
+                resultadoDiv.innerHTML = '<p class="text-red-500">Digite um CNPJ válido com 14 números.</p>';
                 return;
             }
             
-            const url = `https://cors-anywhere.herokuapp.com/https://receitaws.com.br/v1/cnpj/$(cnpj)`;
+            loadingDiv.classList.remove('hidden');
             
-            fetch(url, { headers: { 'Accept': 'application/json' } })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Erro na requisição: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.status === 'ERROR') {
-                        resultadoDiv.innerHTML = '<p style="color: red;">CNPJ não encontrado ou inválido.</p>';
-                    } else {
-                        resultadoDiv.innerHTML = `
-                            <p><strong>Nome:</strong> ${data.nome}</p>
-                            <p><strong>Nome Fantasia:</strong> ${data.fantasia || 'Não informado'}</p>
-                            <p><strong>Situação:</strong> ${data.situacao}</p>
-                            <p><strong>Atividade Principal:</strong> ${data.atividade_principal[0].text}</p>
-                            <p><strong>UF:</strong> ${data.uf}</p>
-                            <p><strong>Telefone:</strong> ${data.telefone || 'Não informado'}</p>
-                            <p><strong>Email:</strong> ${data.email || 'Não informado'}</p>
-                        `;
-                    }
-                })
-                .catch(error => {
-                    resultadoDiv.innerHTML = `<p style="color: red;">Erro ao buscar CNPJ: ${error.message}</p>`;
-                });
+            fetch(`https://cors-anywhere.herokuapp.com/https://receitaws.com.br/v1/cnpj/${cnpj}`, {
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(response => {
+                loadingDiv.classList.add('hidden');
+                if (!response.ok) {
+                    throw new Error(`Erro na requisição: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'ERROR') {
+                    resultadoDiv.innerHTML = '<p class="text-red-500">CNPJ inválido ou inexistente.</p>';
+                } else {
+                    resultadoDiv.innerHTML = `
+                        <p class="text-green-600 font-bold">CNPJ válido!</p>
+                        <p><strong>Nome:</strong> ${data.nome}</p>
+                        <p><strong>Nome Fantasia:</strong> ${data.fantasia || 'Não informado'}</p>
+                        <p><strong>Situação:</strong> ${data.situacao}</p>
+                        <p><strong>Atividade Principal:</strong> ${data.atividade_principal[0].text}</p>
+                        <p><strong>UF:</strong> ${data.uf}</p>
+                        <p><strong>Telefone:</strong> ${data.telefone || 'Não informado'}</p>
+                        <p><strong>Email:</strong> ${data.email || 'Não informado'}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                loadingDiv.classList.add('hidden');
+                resultadoDiv.innerHTML = `<p class="text-red-500">Erro ao buscar CNPJ: ${error.message}</p>`;
+            });
         }
     </script>
 </body>
