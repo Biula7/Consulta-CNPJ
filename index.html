@@ -6,20 +6,25 @@
     <title>Consulta CNPJ - Receita WS</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center text-gray-700">Consulta CNPJ</h1>
+<body class="bg-blue-50 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md border border-blue-300">
+        <h1 class="text-2xl font-bold text-center text-blue-700">Consulta CNPJ</h1>
         <input type="text" id="cnpj" placeholder="Digite o CNPJ (somente números)" 
-               class="w-full p-3 mt-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-               aria-label="Digite o CNPJ">
+               class="w-full p-3 mt-4 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+               aria-label="Digite o CNPJ" oninput="formatarCNPJ()">
         <button onclick="buscarCNPJ()" 
-                class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-3">Buscar</button>
+                class="w-full bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded mt-3">Buscar</button>
         
-        <div id="loading" class="text-center text-gray-600 mt-3 hidden">Carregando...</div>
-        <div id="resultado" class="mt-4 text-gray-700"></div>
+        <div id="loading" class="text-center text-blue-600 mt-3 hidden">Carregando...</div>
+        <div id="resultado" class="mt-4 text-blue-700"></div>
     </div>
 
     <script>
+        function formatarCNPJ() {
+            let cnpjInput = document.getElementById('cnpj');
+            cnpjInput.value = cnpjInput.value.replace(/\D/g, '');
+        }
+
         function buscarCNPJ() {
             const cnpj = document.getElementById('cnpj').value.trim().replace(/\D/g, '');
             const resultadoDiv = document.getElementById('resultado');
